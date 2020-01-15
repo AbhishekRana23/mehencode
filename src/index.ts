@@ -9,6 +9,7 @@ import driveList = require('./drive/drive-list.js');
 import driveUtils = require('./drive/drive-utils.js');
 import details = require('./dl_model/detail');
 import filenameUtils = require('./download_tools/filename-utils');
+import ping=require('./ping/ping');
 import { EventRegex } from './bot_utils/event_regex';
 import { exec } from 'child_process';
 
@@ -17,7 +18,7 @@ const bot = new TelegramBot(constants.TOKEN, { polling: true });
 var websocketOpened = false;
 var statusInterval: NodeJS.Timeout;
 var dlManager = dlm.DlManager.getInstance();
-
+var hosts = ['https://api.telegram.org'];
 initAria2();
 
 bot.on("polling_error", msg => console.error(msg.message));
@@ -34,11 +35,32 @@ function setEventCallback(regexp: RegExp, regexpNoName: RegExp,
 
 setEventCallback(eventRegex.commandsRegex.start, eventRegex.commandsRegexNoName.start, (msg) => {
   if (msgTools.isAuthorized(msg) < 0) {
-    msgTools.sendUnauthorizedMessage(bot, msg);
+    // msgTools.sendUnauthorizedMessage(bot, msg);
+    msgTools.sendMessage(bot, msg, 'How About Asking @ranaji25 For Adding You?', -1);
   } else {
-    msgTools.sendMessage(bot, msg, 'You should know the commands already. Happy mirroring.', -1);
+    msgTools.sendMessage(bot, msg,
+                         'Yo! Im Up 😑 Throw A Torrent/Ddl/magnet At Me',
+                         -1);
   }
 });
+
+/**
+ * Ping with telegram API
+ */
+setEventCallback(eventRegex.commandsRegex.ping, eventRegex.commandsRegexNoName.ping, (msg) => {
+  if (msgTools.isAuthorized(msg) < 0) {
+    msgTools.sendUnauthorizedMessage(bot, msg);
+  }
+  else {
+    ping(hosts).then(function (delta: any) {
+        msgTools.sendMessage(bot, msg, 'Ping time was ' + String(delta) + ' ms.');
+        console.log('Starting ping test. Ping time was ' + String(delta) + ' ms');
+    }).catch(function (err: any) {
+        console.error('Could not ping remote URL', err);
+    });
+  }
+});
+
 
 setEventCallback(eventRegex.commandsRegex.mirrorTar, eventRegex.commandsRegexNoName.mirrorTar, (msg, match) => {
   if (msgTools.isAuthorized(msg) < 0) {
@@ -92,7 +114,7 @@ setEventCallback(eventRegex.commandsRegex.mirrorStatus, eventRegex.commandsRegex
   if (msgTools.isAuthorized(msg) < 0) {
     msgTools.sendUnauthorizedMessage(bot, msg);
   } else {
-    sendStatusMessage(msg);
+    sendStatusMessage(msg , true);
   }
 });
 
@@ -554,27 +576,27 @@ function initAria2(): void {
   ariaTools.setOnDownloadError(ariaOnDownloadError);
 }
 
-
-function driveUploadCompleteCallback(err: string, gid: string, url: string, filePath: string,
-  fileName: string, fileSize: number, isFolder: boolean): void {
-
+function driveUploadCompleteCallback(err: string, gid: string, url: string, filePath: string, fileName: string, fileSize: number): void {
   var finalMessage;
   if (err) {
     var message = err;
     console.error(`${gid}: Failed to upload - ${filePath}: ${message}`);
-    finalMessage = `Failed to upload <code>${fileName}</code> to Drive. ${message}`;
+    finalMessage = `Failed to upload <code>${fileName}</code> to Drive.${message}`;
     cleanupDownload(gid, finalMessage);
   } else {
     console.log(`${gid}: Uploaded `);
     if (fileSize) {
       var fileSizeStr = downloadUtils.formatSize(fileSize);
-      finalMessage = `<a href='${url}'>${fileName}</a> (${fileSizeStr})`;
+      if(url.indexOf("/folders/") > -1){
+        var rawurl = constants.INDEX_DOMAIN + fileName + "/";
+      }else{
+        var rawurl = constants.INDEX_DOMAIN + fileName ;
+      }
+      var indexurl = encodeURI(rawurl) ;
+      finalMessage = `<a href='${url}'>${fileName}</a> (${fileSizeStr}) \n\nIndex Link: \n<a href='${indexurl}'>${fileName}</a>`;
     } else {
-      finalMessage = `<a href='${url}'>${fileName}</a>`;
-    }
-    if (constants.IS_TEAM_DRIVE && isFolder) {
-      finalMessage += '\n\n<i>Folders in Shared Drives can only be shared with members of the drive. Mirror as an archive if you need public links.</i>';
+      finalMessage = `<a href='${url}'>${fileName}</a> \nIndex Link: \n\n<a href='${indexurl}'>${fileName}</a>`;
     }
     cleanupDownload(gid, finalMessage, url);
+    }
   }
-}
