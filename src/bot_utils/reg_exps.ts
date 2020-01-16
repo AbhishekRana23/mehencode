@@ -7,6 +7,7 @@ export class RegExps {
   readonly getFolder: RegExp;
   readonly cancelMirror: RegExp;
   readonly cancelAll: RegExp;
+  readonly ping: RegExp;
   readonly disk: RegExp;
 
   constructor(commands: string[]) {
@@ -19,5 +20,6 @@ export class RegExps {
     this.cancelMirror = new RegExp(commands[6], 'i');
     this.cancelAll = new RegExp(commands[7], 'i');
     this.disk = new RegExp(commands[8], 'i');
+    this.ping = new RegExp(commands[9], 'i');
   }
 }
