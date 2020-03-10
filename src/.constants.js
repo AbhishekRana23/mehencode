@@ -1,6 +1,6 @@
 module.exports = Object.freeze({
   INDEX_DOMAIN : 'https://drive.ranaji.me/',
-  TOKEN: '1023500532:AAFshWalF0XFlvvI6dEoZyro5Ddrp_ckh9k',
+  TOKEN: '1114171340:AAEFiK_4f1uEsvSFCHNJszWSc_xRQNP85Gg',
   ARIA_SECRET: 'AbhishekRana',
   ARIA_DOWNLOAD_LOCATION: '/home/user/path/to/download/dir (no trailing "/")',
   ARIA_DOWNLOAD_LOCATION_ROOT: '/', //The mountpoint that contains ARIA_DOWNLOAD_LOCATION
