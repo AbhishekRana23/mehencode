@@ -4,7 +4,7 @@
   "description": "Pushes Files to Gdrive",
   "main": "index.js",
   "scripts": {
-    "start": "npm install && tsc && chmod +x aria.sh && ./aria.sh && NTBA_FIX_319=1 node --max_old_space_size=128 ./out/index.js"
+    "start": "apt install aria2 && npm install && tsc && chmod +x aria.sh && ./aria.sh && NTBA_FIX_319=1 node --max_old_space_size=128 ./out/index.js"
   },
   "author": "Rana-Ji",
   "license": "MIT",
